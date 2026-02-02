@@ -31,20 +31,14 @@ const BOMs = () => {
   const [rawMaterials, setRawMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    code: '',
-    name: '',
-    output_sku_id: '',
-    lines: [],
-    co_products: []
-  });
-  const [newLine, setNewLine] = useState({
-    item_type: 'raw_material',
-    item_id: '',
-    quantity: '',
-    unit: 'kg',
-    recovery_rate: '0'
-  });
+  const [bomCode, setBomCode] = useState('');
+  const [bomName, setBomName] = useState('');
+  const [outputSkuId, setOutputSkuId] = useState('');
+  const [bomLines, setBomLines] = useState([]);
+  const [newLineType, setNewLineType] = useState('raw_material');
+  const [newLineItemId, setNewLineItemId] = useState('');
+  const [newLineQty, setNewLineQty] = useState('');
+  const [newLineRecovery, setNewLineRecovery] = useState('0');
 
   useEffect(() => {
     fetchData();
@@ -52,15 +46,14 @@ const BOMs = () => {
 
   const fetchData = async () => {
     try {
-      const [bomsRes, skusRes, rmRes] = await Promise.all([
-        axios.get(`${API_URL}/boms`, getAuthHeaders()),
-        axios.get(`${API_URL}/skus`, getAuthHeaders()),
-        axios.get(`${API_URL}/raw-materials?status=active`, getAuthHeaders())
-      ]);
+      const headers = getAuthHeaders();
+      const bomsRes = await axios.get(`${API_URL}/boms`, headers);
+      const skusRes = await axios.get(`${API_URL}/skus`, headers);
+      const rmRes = await axios.get(`${API_URL}/raw-materials?status=active`, headers);
       setBOMs(bomsRes.data);
       setSKUs(skusRes.data);
       setRawMaterials(rmRes.data);
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to fetch data');
     } finally {
       setLoading(false);
@@ -68,42 +61,51 @@ const BOMs = () => {
   };
 
   const handleAddLine = () => {
-    if (!newLine.item_id || !newLine.quantity) {
+    if (!newLineItemId || !newLineQty) {
       toast.error('Please fill in item and quantity');
       return;
     }
-    setFormData({
-      ...formData,
-      lines: [...formData.lines, {
-        ...newLine,
-        quantity: parseFloat(newLine.quantity),
-        recovery_rate: parseFloat(newLine.recovery_rate || 0)
-      }]
-    });
-    setNewLine({ item_type: 'raw_material', item_id: '', quantity: '', unit: 'kg', recovery_rate: '0' });
+    const line = {
+      item_type: newLineType,
+      item_id: newLineItemId,
+      quantity: parseFloat(newLineQty),
+      unit: 'kg',
+      recovery_rate: parseFloat(newLineRecovery || 0)
+    };
+    setBomLines([...bomLines, line]);
+    setNewLineItemId('');
+    setNewLineQty('');
+    setNewLineRecovery('0');
   };
 
   const handleRemoveLine = (index) => {
-    setFormData({
-      ...formData,
-      lines: formData.lines.filter((_, i) => i !== index)
-    });
+    setBomLines(bomLines.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.lines.length === 0) {
+    if (bomLines.length === 0) {
       toast.error('Please add at least one BOM line');
       return;
     }
     try {
-      await axios.post(`${API_URL}/boms`, formData, getAuthHeaders());
+      const data = {
+        code: bomCode,
+        name: bomName,
+        output_sku_id: outputSkuId,
+        lines: bomLines,
+        co_products: []
+      };
+      await axios.post(`${API_URL}/boms`, data, getAuthHeaders());
       toast.success('BOM created');
       setDialogOpen(false);
-      setFormData({ code: '', name: '', output_sku_id: '', lines: [], co_products: [] });
+      setBomCode('');
+      setBomName('');
+      setOutputSkuId('');
+      setBomLines([]);
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to create');
     }
   };
 
@@ -112,18 +114,30 @@ const BOMs = () => {
       await axios.put(`${API_URL}/boms/${id}/activate`, {}, getAuthHeaders());
       toast.success('BOM activated');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to activate');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to activate');
     }
   };
 
-  const getSKUName = (id) => skus.find(s => s.id === id)?.name || id;
-  const getRMName = (id) => rawMaterials.find(r => r.id === id)?.name || id;
+  const getSKUName = (id) => {
+    const found = skus.find(s => s.id === id);
+    return found ? found.name : id;
+  };
+
+  const getRMName = (id) => {
+    const found = rawMaterials.find(r => r.id === id);
+    return found ? found.name : id;
+  };
 
   const getStatusBadge = (status) => {
-    const styles = { draft: 'status-draft', active: 'status-active' };
-    return <Badge className={`${styles[status] || ''} text-xs`}>{status}</Badge>;
+    if (status === 'draft') return <Badge className="status-draft text-xs">{status}</Badge>;
+    if (status === 'active') return <Badge className="status-active text-xs">{status}</Badge>;
+    return <Badge className="text-xs">{status}</Badge>;
   };
+
+  const itemOptions = newLineType === 'raw_material' 
+    ? rawMaterials 
+    : skus.filter(s => s.category === 'Intermediate');
 
   return (
     <div className="space-y-6" data-testid="boms-page">
@@ -149,8 +163,8 @@ const BOMs = () => {
                   <div className="space-y-2">
                     <Label className="label-style">Code</Label>
                     <Input
-                      value={formData.code}
-                      onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                      value={bomCode}
+                      onChange={(e) => setBomCode(e.target.value)}
                       placeholder="BOM001"
                       required
                       data-testid="bom-code-input"
@@ -159,8 +173,8 @@ const BOMs = () => {
                   <div className="space-y-2">
                     <Label className="label-style">Name</Label>
                     <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      value={bomName}
+                      onChange={(e) => setBomName(e.target.value)}
                       placeholder="Product A Recipe"
                       required
                     />
@@ -168,7 +182,7 @@ const BOMs = () => {
                 </div>
                 <div className="space-y-2">
                   <Label className="label-style">Output SKU</Label>
-                  <Select value={formData.output_sku_id} onValueChange={(v) => setFormData({ ...formData, output_sku_id: v })}>
+                  <Select value={outputSkuId} onValueChange={setOutputSkuId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select output product" />
                     </SelectTrigger>
@@ -180,14 +194,12 @@ const BOMs = () => {
                   </Select>
                 </div>
 
-                {/* BOM Lines */}
                 <div className="space-y-4">
                   <Label className="label-style">BOM Lines</Label>
                   
-                  {/* Existing lines */}
-                  {formData.lines.length > 0 && (
+                  {bomLines.length > 0 && (
                     <div className="border rounded-md divide-y">
-                      {formData.lines.map((line, idx) => (
+                      {bomLines.map((line, idx) => (
                         <div key={idx} className="flex items-center justify-between p-3 text-sm">
                           <div className="flex-1">
                             <span className="font-medium">
@@ -208,11 +220,10 @@ const BOMs = () => {
                     </div>
                   )}
 
-                  {/* Add new line */}
                   <div className="grid grid-cols-5 gap-2 items-end border rounded-md p-3 bg-zinc-50">
                     <div className="space-y-1">
                       <Label className="text-xs">Type</Label>
-                      <Select value={newLine.item_type} onValueChange={(v) => setNewLine({ ...newLine, item_type: v, item_id: '' })}>
+                      <Select value={newLineType} onValueChange={(v) => { setNewLineType(v); setNewLineItemId(''); }}>
                         <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
@@ -224,15 +235,14 @@ const BOMs = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Item</Label>
-                      <Select value={newLine.item_id} onValueChange={(v) => setNewLine({ ...newLine, item_id: v })}>
+                      <Select value={newLineItemId} onValueChange={setNewLineItemId}>
                         <SelectTrigger className="h-9">
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {newLine.item_type === 'raw_material'
-                            ? rawMaterials.map(rm => <SelectItem key={rm.id} value={rm.id}>{rm.name}</SelectItem>)
-                            : skus.filter(s => s.category === 'Intermediate').map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)
-                          }
+                          {itemOptions.map(item => (
+                            <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -240,8 +250,8 @@ const BOMs = () => {
                       <Label className="text-xs">Qty</Label>
                       <Input
                         type="number"
-                        value={newLine.quantity}
-                        onChange={(e) => setNewLine({ ...newLine, quantity: e.target.value })}
+                        value={newLineQty}
+                        onChange={(e) => setNewLineQty(e.target.value)}
                         placeholder="0"
                         className="h-9"
                       />
@@ -250,8 +260,8 @@ const BOMs = () => {
                       <Label className="text-xs">Recovery %</Label>
                       <Input
                         type="number"
-                        value={newLine.recovery_rate}
-                        onChange={(e) => setNewLine({ ...newLine, recovery_rate: e.target.value })}
+                        value={newLineRecovery}
+                        onChange={(e) => setNewLineRecovery(e.target.value)}
                         placeholder="0"
                         className="h-9"
                       />
