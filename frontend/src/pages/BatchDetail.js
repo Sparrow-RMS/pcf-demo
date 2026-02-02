@@ -51,9 +51,14 @@ const BatchDetail = () => {
   const [outputDialogOpen, setOutputDialogOpen] = useState(false);
   const [energyDialogOpen, setEnergyDialogOpen] = useState(false);
   
-  const [inputForm, setInputForm] = useState({ raw_material_id: '', quantity: '', supplier_id: '' });
-  const [outputForm, setOutputForm] = useState({ sku_id: '', quantity: '' });
-  const [energyForm, setEnergyForm] = useState({ machine_id: '', utility_source_id: '', quantity: '', measurement_type: 'metered' });
+  const [inputRmId, setInputRmId] = useState('');
+  const [inputQty, setInputQty] = useState('');
+  const [outputSkuId, setOutputSkuId] = useState('');
+  const [outputQty, setOutputQty] = useState('');
+  const [energyMachineId, setEnergyMachineId] = useState('');
+  const [energyUtilityId, setEnergyUtilityId] = useState('');
+  const [energyQty, setEnergyQty] = useState('');
+  const [energyType, setEnergyType] = useState('metered');
 
   useEffect(() => {
     fetchData();
@@ -61,19 +66,18 @@ const BatchDetail = () => {
 
   const fetchData = async () => {
     try {
-      const [batchRes, rmRes, skuRes, machineRes, utilityRes] = await Promise.all([
-        axios.get(`${API_URL}/batches/${id}`, getAuthHeaders()),
-        axios.get(`${API_URL}/raw-materials?status=active`, getAuthHeaders()),
-        axios.get(`${API_URL}/skus`, getAuthHeaders()),
-        axios.get(`${API_URL}/machines`, getAuthHeaders()),
-        axios.get(`${API_URL}/utility-sources`, getAuthHeaders())
-      ]);
+      const headers = getAuthHeaders();
+      const batchRes = await axios.get(`${API_URL}/batches/${id}`, headers);
+      const rmRes = await axios.get(`${API_URL}/raw-materials?status=active`, headers);
+      const skuRes = await axios.get(`${API_URL}/skus`, headers);
+      const machineRes = await axios.get(`${API_URL}/machines`, headers);
+      const utilityRes = await axios.get(`${API_URL}/utility-sources`, headers);
       setBatch(batchRes.data);
       setRawMaterials(rmRes.data);
       setSKUs(skuRes.data);
       setMachines(machineRes.data);
       setUtilitySources(utilityRes.data);
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to fetch batch data');
       navigate('/batches');
     } finally {
@@ -85,15 +89,16 @@ const BatchDetail = () => {
     e.preventDefault();
     try {
       const response = await axios.put(`${API_URL}/batches/${id}/inputs`, {
-        ...inputForm,
-        quantity: parseFloat(inputForm.quantity)
+        raw_material_id: inputRmId,
+        quantity: parseFloat(inputQty)
       }, getAuthHeaders());
       toast.success(`Input added. PCF: ${response.data.pcf_value}`);
       setInputDialogOpen(false);
-      setInputForm({ raw_material_id: '', quantity: '', supplier_id: '' });
+      setInputRmId('');
+      setInputQty('');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to add input');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to add input');
     }
   };
 
@@ -101,15 +106,16 @@ const BatchDetail = () => {
     e.preventDefault();
     try {
       const response = await axios.put(`${API_URL}/batches/${id}/outputs`, {
-        ...outputForm,
-        quantity: parseFloat(outputForm.quantity)
+        sku_id: outputSkuId,
+        quantity: parseFloat(outputQty)
       }, getAuthHeaders());
       toast.success(`Output added. PCF: ${response.data.pcf_value}`);
       setOutputDialogOpen(false);
-      setOutputForm({ sku_id: '', quantity: '' });
+      setOutputSkuId('');
+      setOutputQty('');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to add output');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to add output');
     }
   };
 
@@ -117,15 +123,19 @@ const BatchDetail = () => {
     e.preventDefault();
     try {
       const response = await axios.put(`${API_URL}/batches/${id}/energy`, {
-        ...energyForm,
-        quantity: parseFloat(energyForm.quantity)
+        machine_id: energyMachineId,
+        utility_source_id: energyUtilityId,
+        quantity: parseFloat(energyQty),
+        measurement_type: energyType
       }, getAuthHeaders());
       toast.success(`Energy added. PCF: ${response.data.pcf_value}`);
       setEnergyDialogOpen(false);
-      setEnergyForm({ machine_id: '', utility_source_id: '', quantity: '', measurement_type: 'metered' });
+      setEnergyMachineId('');
+      setEnergyUtilityId('');
+      setEnergyQty('');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to add energy');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to add energy');
     }
   };
 
@@ -134,8 +144,8 @@ const BatchDetail = () => {
       await axios.put(`${API_URL}/batches/${id}/close`, {}, getAuthHeaders());
       toast.success('Batch closed');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to close batch');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to close batch');
     }
   };
 
@@ -144,8 +154,8 @@ const BatchDetail = () => {
       await axios.put(`${API_URL}/batches/${id}/approve`, {}, getAuthHeaders());
       toast.success('Batch approved');
       fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to approve batch');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to approve batch');
     }
   };
 
@@ -154,18 +164,31 @@ const BatchDetail = () => {
       await axios.post(`${API_URL}/batches/${id}/certificate`, {}, getAuthHeaders());
       toast.success('Certificate generated');
       navigate('/certificates');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to generate certificate');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to generate certificate');
     }
   };
 
-  const getRMName = (rmId) => rawMaterials.find(r => r.id === rmId)?.name || rmId;
-  const getSKUName = (skuId) => skus.find(s => s.id === skuId)?.name || skuId;
-  const getMachineName = (mId) => machines.find(m => m.id === mId)?.name || mId;
+  const getRMName = (rmId) => {
+    const found = rawMaterials.find(r => r.id === rmId);
+    return found ? found.name : rmId;
+  };
+
+  const getSKUName = (skuId) => {
+    const found = skus.find(s => s.id === skuId);
+    return found ? found.name : skuId;
+  };
+
+  const getMachineName = (mId) => {
+    const found = machines.find(m => m.id === mId);
+    return found ? found.name : mId;
+  };
 
   const getStatusBadge = (status) => {
-    const styles = { open: 'status-open', closed: 'status-closed', approved: 'status-approved' };
-    return <Badge className={`${styles[status] || ''} text-xs`}>{status}</Badge>;
+    if (status === 'open') return <Badge className="status-open text-xs">{status}</Badge>;
+    if (status === 'closed') return <Badge className="status-closed text-xs">{status}</Badge>;
+    if (status === 'approved') return <Badge className="status-approved text-xs">{status}</Badge>;
+    return <Badge className="text-xs">{status}</Badge>;
   };
 
   if (loading) {
@@ -178,9 +201,12 @@ const BatchDetail = () => {
 
   if (!batch) return null;
 
+  const batchInputs = batch.inputs || [];
+  const batchOutputs = batch.outputs || [];
+  const batchEnergy = batch.energy || [];
+
   return (
     <div className="space-y-6" data-testid="batch-detail-page">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate('/batches')} className="h-9 w-9 p-0">
@@ -217,7 +243,6 @@ const BatchDetail = () => {
         </div>
       </div>
 
-      {/* PCF Card */}
       <Card className="grid-card bg-primary/5 border-primary/20">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -235,9 +260,7 @@ const BatchDetail = () => {
         </CardContent>
       </Card>
 
-      {/* Data Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Inputs */}
         <Card className="grid-card p-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-heading text-lg flex items-center gap-2">
@@ -258,7 +281,7 @@ const BatchDetail = () => {
                   <form onSubmit={handleAddInput} className="space-y-4">
                     <div className="space-y-2">
                       <Label className="label-style">Raw Material</Label>
-                      <Select value={inputForm.raw_material_id} onValueChange={(v) => setInputForm({ ...inputForm, raw_material_id: v })}>
+                      <Select value={inputRmId} onValueChange={setInputRmId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select material" />
                         </SelectTrigger>
@@ -273,8 +296,8 @@ const BatchDetail = () => {
                       <Label className="label-style">Quantity</Label>
                       <Input
                         type="number"
-                        value={inputForm.quantity}
-                        onChange={(e) => setInputForm({ ...inputForm, quantity: e.target.value })}
+                        value={inputQty}
+                        onChange={(e) => setInputQty(e.target.value)}
                         placeholder="0"
                         required
                       />
@@ -289,9 +312,9 @@ const BatchDetail = () => {
             )}
           </CardHeader>
           <CardContent>
-            {batch.inputs?.length > 0 ? (
+            {batchInputs.length > 0 ? (
               <div className="space-y-2">
-                {batch.inputs.map((inp, idx) => (
+                {batchInputs.map((inp, idx) => (
                   <div key={idx} className="flex justify-between items-center p-2 bg-zinc-50 rounded text-sm">
                     <span>{getRMName(inp.raw_material_id)}</span>
                     <span className="font-mono">{inp.quantity}</span>
@@ -304,7 +327,6 @@ const BatchDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Outputs */}
         <Card className="grid-card p-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-heading text-lg flex items-center gap-2">
@@ -325,7 +347,7 @@ const BatchDetail = () => {
                   <form onSubmit={handleAddOutput} className="space-y-4">
                     <div className="space-y-2">
                       <Label className="label-style">SKU</Label>
-                      <Select value={outputForm.sku_id} onValueChange={(v) => setOutputForm({ ...outputForm, sku_id: v })}>
+                      <Select value={outputSkuId} onValueChange={setOutputSkuId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select SKU" />
                         </SelectTrigger>
@@ -340,8 +362,8 @@ const BatchDetail = () => {
                       <Label className="label-style">Quantity</Label>
                       <Input
                         type="number"
-                        value={outputForm.quantity}
-                        onChange={(e) => setOutputForm({ ...outputForm, quantity: e.target.value })}
+                        value={outputQty}
+                        onChange={(e) => setOutputQty(e.target.value)}
                         placeholder="0"
                         required
                       />
@@ -356,9 +378,9 @@ const BatchDetail = () => {
             )}
           </CardHeader>
           <CardContent>
-            {batch.outputs?.length > 0 ? (
+            {batchOutputs.length > 0 ? (
               <div className="space-y-2">
-                {batch.outputs.map((out, idx) => (
+                {batchOutputs.map((out, idx) => (
                   <div key={idx} className="flex justify-between items-center p-2 bg-zinc-50 rounded text-sm">
                     <span>{getSKUName(out.sku_id)}</span>
                     <span className="font-mono">{out.quantity}</span>
@@ -371,7 +393,6 @@ const BatchDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Energy */}
         <Card className="grid-card p-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-heading text-lg flex items-center gap-2">
@@ -392,7 +413,7 @@ const BatchDetail = () => {
                   <form onSubmit={handleAddEnergy} className="space-y-4">
                     <div className="space-y-2">
                       <Label className="label-style">Machine</Label>
-                      <Select value={energyForm.machine_id} onValueChange={(v) => setEnergyForm({ ...energyForm, machine_id: v })}>
+                      <Select value={energyMachineId} onValueChange={setEnergyMachineId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select machine" />
                         </SelectTrigger>
@@ -405,7 +426,7 @@ const BatchDetail = () => {
                     </div>
                     <div className="space-y-2">
                       <Label className="label-style">Utility Source</Label>
-                      <Select value={energyForm.utility_source_id} onValueChange={(v) => setEnergyForm({ ...energyForm, utility_source_id: v })}>
+                      <Select value={energyUtilityId} onValueChange={setEnergyUtilityId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select utility" />
                         </SelectTrigger>
@@ -421,15 +442,15 @@ const BatchDetail = () => {
                         <Label className="label-style">Quantity (kWh/hrs)</Label>
                         <Input
                           type="number"
-                          value={energyForm.quantity}
-                          onChange={(e) => setEnergyForm({ ...energyForm, quantity: e.target.value })}
+                          value={energyQty}
+                          onChange={(e) => setEnergyQty(e.target.value)}
                           placeholder="0"
                           required
                         />
                       </div>
                       <div className="space-y-2">
                         <Label className="label-style">Type</Label>
-                        <Select value={energyForm.measurement_type} onValueChange={(v) => setEnergyForm({ ...energyForm, measurement_type: v })}>
+                        <Select value={energyType} onValueChange={setEnergyType}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -450,9 +471,9 @@ const BatchDetail = () => {
             )}
           </CardHeader>
           <CardContent>
-            {batch.energy?.length > 0 ? (
+            {batchEnergy.length > 0 ? (
               <div className="space-y-2">
-                {batch.energy.map((e, idx) => (
+                {batchEnergy.map((e, idx) => (
                   <div key={idx} className="flex justify-between items-center p-2 bg-zinc-50 rounded text-sm">
                     <span>{getMachineName(e.machine_id)}</span>
                     <span className="font-mono">{e.quantity} kWh</span>
