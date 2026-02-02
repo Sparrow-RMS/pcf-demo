@@ -1,70 +1,220 @@
-# Getting Started with Create React App
+# PCF Management System - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based frontend for Product Carbon Footprint (PCF) management, featuring an industrial-themed dashboard, master data management, batch tracking, and certificate generation.
 
-## Available Scripts
+## Tech Stack
 
-In the project directory, you can run:
+- **Framework**: React 19
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/UI (Radix primitives)
+- **Charts**: Recharts
+- **Routing**: React Router v7
+- **HTTP Client**: Axios
+- **Form Handling**: React Hook Form + Zod
+- **Notifications**: Sonner
 
-### `npm start`
+## Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js 18+
+- Yarn (recommended) or npm
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. **Navigate to the frontend directory**
+   ```bash
+   cd frontend
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. **Install dependencies**
+   ```bash
+   yarn install
+   # or
+   npm install
+   ```
 
-### `npm run build`
+3. **Configure environment variables**
+   
+   Create a `.env` file in the `/frontend` directory:
+   ```env
+   REACT_APP_BACKEND_URL=http://localhost:8001
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   For production, update to your deployed backend URL.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Running the Application
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Development Mode
+```bash
+yarn start
+# or
+npm start
+```
 
-### `npm run eject`
+The app will be available at `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Production Build
+```bash
+yarn build
+# or
+npm run build
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The build output will be in the `build/` directory.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Serve Production Build
+```bash
+npx serve -s build
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Project Structure
 
-## Learn More
+```
+frontend/
+├── public/
+│   └── index.html
+├── src/
+│   ├── components/
+│   │   ├── ui/              # Shadcn UI components
+│   │   └── Layout.js        # Main layout with sidebar
+│   ├── context/
+│   │   └── AuthContext.js   # Authentication context
+│   ├── pages/
+│   │   ├── Login.js         # Login page
+│   │   ├── Dashboard.js     # Main dashboard
+│   │   ├── RawMaterials.js  # Raw materials management
+│   │   ├── EmissionFactors.js
+│   │   ├── Suppliers.js
+│   │   ├── TransportLanes.js
+│   │   ├── Machines.js
+│   │   ├── Plants.js
+│   │   ├── SKUs.js
+│   │   ├── BOMs.js          # BOM/Recipe builder
+│   │   ├── Batches.js       # Batch list
+│   │   ├── BatchDetail.js   # Batch details & PCF
+│   │   ├── Certificates.js  # Certificate management
+│   │   ├── AuditLogs.js     # Audit trail viewer
+│   │   └── Users.js         # User management (admin)
+│   ├── App.js               # Main app with routing
+│   ├── App.css
+│   ├── index.js             # Entry point
+│   └── index.css            # Global styles & Tailwind
+├── package.json
+├── tailwind.config.js
+└── postcss.config.js
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Default Login Credentials
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Email**: `admin@pcf.com`
+- **Password**: `admin123`
 
-### Code Splitting
+## Features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Dashboard
+- KPI cards: Total Batches, Open Batches, Raw Materials, Avg PCF
+- PCF Trends line chart
+- Emission Hotspots pie chart
+- Supplier Rankings bar chart
+- Time range filter (7/30/90 days)
 
-### Analyzing the Bundle Size
+### Master Data Management
+- **Raw Materials**: CRUD, bulk CSV upload, activation workflow
+- **Emission Factors**: CO2/CH4/N2O input, GWP set selection, version management
+- **Suppliers**: Contact management
+- **Transport Lanes**: Route management with emission factors
+- **Machines**: Energy model configuration (metered/run-hours)
+- **Plants**: Manufacturing facility management
+- **SKUs**: Product/intermediate management
+- **BOMs/Recipes**: Nested bill of materials with recovery rates
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Batch Management
+- Create batches linked to BOMs
+- Add inputs (raw materials)
+- Add outputs (SKUs)
+- Add energy consumption
+- Real-time PCF calculation
+- Close → Approve workflow
 
-### Making a Progressive Web App
+### Certificates
+- Generate PDF certificates for approved batches
+- Download certificate PDFs
+- View certificate history
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Audit Logs
+- Complete audit trail
+- Filter by entity type
+- Search by entity ID
+- Export audit packs (JSON)
 
-### Advanced Configuration
+### User Management (Admin Only)
+- Create users with role assignment
+- Change user roles
+- Activate/deactivate users
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Design System
 
-### Deployment
+The UI follows an "Industrial Eco-Brutalism" design:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Colors
+- **Primary**: Deep Evergreen (#0F2F24)
+- **Secondary**: Safety Orange (#FF5722)
+- **Background**: Zinc-100 (#F4F4F5)
+- **Accent**: Pale Emerald (#D1FAE5)
 
-### `npm run build` fails to minify
+### Typography
+- **Headings**: IBM Plex Sans (600, 700)
+- **Body**: Manrope (400, 500, 600)
+- **Mono**: JetBrains Mono (400)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Components
+- Grid-bordered cards
+- Sharp/slightly rounded buttons
+- High-contrast tooltips
+- Visible borders and structure
+
+## Role-Based Access
+
+| Feature | superadmin | master_approver | master_steward | esg_analyst | batch_operator | auditor |
+|---------|------------|-----------------|----------------|-------------|----------------|---------|
+| Dashboard | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Create Master Data | ✓ | - | ✓ | - | - | - |
+| Activate Records | ✓ | ✓ | - | - | - | - |
+| Emission Factors | ✓ | - | ✓ | ✓ | - | - |
+| Create Batches | ✓ | - | - | - | ✓ | - |
+| Approve Batches | ✓ | ✓ | - | - | - | - |
+| Generate Certs | ✓ | ✓ | - | - | - | - |
+| View Audit Logs | ✓ | - | - | - | - | ✓ |
+| User Management | ✓ | - | - | - | - | - |
+
+## Testing
+
+```bash
+yarn test
+# or
+npm test
+```
+
+## Linting
+
+```bash
+yarn lint
+# or
+npm run lint
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `REACT_APP_BACKEND_URL` | Backend API URL | `http://localhost:8001` |
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+## License
+
+MIT License
