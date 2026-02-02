@@ -1275,6 +1275,8 @@ async def generate_certificate(batch_id: str, user: dict = Depends(require_roles
     await db.certificates.insert_one(certificate)
     
     await create_audit_log("certificate", certificate["id"], "generate", user, {"batch_id": batch_id})
+    # Remove MongoDB's _id before returning
+    certificate.pop("_id", None)
     return certificate
 
 @api_router.get("/certificates", response_model=List[dict])
