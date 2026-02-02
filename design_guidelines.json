@@ -1,0 +1,129 @@
+{
+  "identity": {
+    "name": "E1",
+    "archetype": "Industrial Eco-Brutalism",
+    "principles": [
+      "Fusion over Imitation: Mix Industrial Precision with Organic Sustainability.",
+      "Data Density: Every pixel must serve a purpose. No fluff.",
+      "Visible Structure: Expose the grid. Show the skeleton.",
+      "Contrast is King: High contrast for safety and readability."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "heading": {
+        "family": "IBM Plex Sans",
+        "weights": ["600", "700"],
+        "usage": "Page titles, Section headers, KPI values"
+      },
+      "body": {
+        "family": "Manrope",
+        "weights": ["400", "500", "600"],
+        "usage": "Table data, labels, paragraphs, inputs"
+      },
+      "mono": {
+        "family": "JetBrains Mono",
+        "weights": ["400"],
+        "usage": "Code snippets, Batch IDs, Hash values"
+      }
+    },
+    "rules": [
+      "Headings must use tight tracking (-0.02em).",
+      "KPI numbers must be massive (text-4xl to text-6xl).",
+      "Labels must be uppercase, small (text-xs), and wide tracking (0.1em)."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#0F2F24",
+        "foreground": "#FFFFFF",
+        "description": "Deep Evergreen - The anchor. Use for primary actions, active states, and brand headers."
+      },
+      "secondary": {
+        "DEFAULT": "#FF5722",
+        "foreground": "#FFFFFF",
+        "description": "Safety Orange - Use for alerts, critical actions, and 'hotspot' indicators."
+      },
+      "background": {
+        "DEFAULT": "#F4F4F5",
+        "paper": "#FFFFFF",
+        "description": "Zinc-100 for app background, White for cards/surfaces."
+      },
+      "muted": {
+        "DEFAULT": "#E4E4E7",
+        "foreground": "#52525B",
+        "description": "Zinc-200 for borders and dividers."
+      },
+      "accent": {
+        "DEFAULT": "#D1FAE5",
+        "foreground": "#064E3B",
+        "description": "Pale Emerald - Use for positive trends and success states."
+      }
+    },
+    "gradients": {
+      "forbidden": true,
+      "rule": "No gradients. Use solid, flat colors or subtle noise textures."
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "spacing": {
+      "base": "0.25rem",
+      "container_padding": "p-6 md:p-8",
+      "gap": "gap-4 md:gap-6"
+    },
+    "surface_strategy": "Grid Borders",
+    "rules": [
+      "Containers must have visible borders (border-zinc-200).",
+      "Use 'border-collapse' style layouts for dashboards.",
+      "No rounded corners on internal grid items. Max rounded-md on outer containers.",
+      "Dense information density: Use h-full to stretch items."
+    ]
+  },
+  "components": {
+    "buttons": {
+      "style": "Sharp or slightly rounded (rounded-sm).",
+      "interaction": "Transform: active:scale-95. Hover: brightness-110."
+    },
+    "cards": {
+      "style": "Flat, white background, 1px border (border-zinc-200), no shadow by default.",
+      "hover": "Shadow-md, border-zinc-300."
+    },
+    "inputs": {
+      "style": "bg-white, border-zinc-300, rounded-sm. Focus: ring-2 ring-primary/20 ring-offset-0."
+    },
+    "charts": {
+      "library": "Recharts (via Shadcn)",
+      "style": "Minimalist. No grid lines inside charts unless necessary. Tooltips must be high contrast (black bg, white text)."
+    }
+  },
+  "images": {
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1767294274634-613a3545e36d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NDh8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwZmFjdG9yeSUyMGludGVyaW9yJTIwY2xlYW58ZW58MHx8fHwxNzcwMDM5NTc1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Clean industrial factory interior",
+      "usage": "Login page background, Dashboard empty states"
+    },
+    "raw_materials": {
+      "url": "https://images.unsplash.com/photo-1763926025477-423847028860?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxyYXclMjBtYXRlcmlhbHMlMjB3YXJlaG91c2V8ZW58MHx8fHwxNzcwMDM5NTg1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Metal rods in warehouse",
+      "usage": "Raw Materials Master Data section header"
+    },
+    "operator": {
+      "url": "https://images.unsplash.com/photo-1758685734156-3c5d35bae1d1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwzfHxjaGVtaWNhbCUyMGVuZ2luZWVyJTIwdGFibGV0fGVufDB8fHx8MTc3MDAzOTU3OXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Scientist/Operator with tablet",
+      "usage": "User profile, Audit log header"
+    }
+  },
+  "universal_guidelines": [
+    "Avoid 'AI Slop': No generic centered layouts. Use asymmetry.",
+    "Dark colors must be solid, not gradients.",
+    "Use glass-morphism sparingly (only for sticky headers).",
+    "Micro-animations are mandatory for all interactive elements.",
+    "Use 'sonner' for toasts.",
+    "All interactive elements must have 'data-testid'.",
+    "Do not use 'Inter' font for headings.",
+    "Do not use 'Space Grotesk' font."
+  ],
+  "instructions_to_main_agent": "You are building a high-precision Industrial ESG Dashboard. Prioritize data density and clarity. Use the 'Grid Borders' layout strategy where every section is defined by visible lines. Use the provided images for context. Follow the color palette strictly - Deep Evergreen is your anchor."
+}
