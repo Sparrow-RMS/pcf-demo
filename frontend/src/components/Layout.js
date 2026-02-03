@@ -87,12 +87,19 @@ const Layout = () => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-200">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <img
+                src="/sparrow_logo-2.png"
+                alt="Sparrow Logo"
+                className="h-7 max-h-7 w-auto object-contain"
+              />
+            </div>
+            {/*<div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-white" />
               </div>
               <span className="font-heading font-bold text-lg text-primary">PCF Manager</span>
-            </div>
+            </div>*/}
             <button 
               className="lg:hidden p-1 hover:bg-zinc-100 rounded"
               onClick={() => setSidebarOpen(false)}
@@ -174,6 +181,12 @@ const Layout = () => {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
+           {/* Industry OS logo (right side) */}
+          <img
+            src="/industry-os.png"
+            alt="Industry OS"
+            className="h-11 w-auto object-contain"
+          />
         </header>
 
         {/* Page content */}

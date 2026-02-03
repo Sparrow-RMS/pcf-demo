@@ -40,10 +40,20 @@ const Login = () => {
         <div className="absolute inset-0 bg-primary/80" />
         <div className="relative z-10 p-12 flex flex-col justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur rounded flex items-center justify-center">
+            {/*<div className="w-10 h-10 bg-white/20 backdrop-blur rounded flex items-center justify-center">
               <Leaf className="w-6 h-6 text-white" />
             </div>
-            <span className="font-heading font-bold text-xl text-white">PCF Manager</span>
+            
+            <span className="font-heading font-bold text-xl text-white">PCF Manager</span>*/}
+            <div className="flex items-center gap-3">
+              <img
+                src="/sparrow-logo.png"
+                alt="Sparrow Logo"
+                className="h-20 max-h-20 w-auto object-contain"
+              />
+            </div>
+
+
           </div>
           <div className="max-w-md">
             <h1 className="font-heading text-4xl lg:text-5xl font-bold text-white mb-6">
@@ -55,7 +65,7 @@ const Login = () => {
             </p>
           </div>
           <div className="text-white/60 text-sm">
-            © 2024 PCF Manager. All rights reserved.
+            © Sparrow Risk Management Pvt Ltd. All rights reserved.
           </div>
         </div>
       </div>
@@ -64,15 +74,24 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-zinc-50">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
+          <div className="flex justify-center mb-4">
+                <img
+                  src="/industry-os.png"
+                  alt="Industry OS Logo"
+                  className="h-20 w-auto object-contain"
+                />
+          </div>
           <div className="lg:hidden flex items-center gap-3 mb-10">
             <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
               <Leaf className="w-6 h-6 text-white" />
             </div>
             <span className="font-heading font-bold text-xl text-primary">PCF Manager</span>
+            
           </div>
 
           <div className="grid-card rounded-md">
             <div className="mb-8">
+              
               <h2 className="font-heading text-2xl font-bold text-primary mb-2">Sign In</h2>
               <p className="text-muted-foreground">Enter your credentials to access the platform</p>
             </div>
@@ -127,9 +146,10 @@ const Login = () => {
             </form>
 
             <div className="mt-6 pt-6 border-t border-zinc-200">
+              {/*
               <p className="text-sm text-muted-foreground text-center">
                 Demo credentials: <span className="font-mono text-xs bg-zinc-100 px-2 py-1 rounded">admin@pcf.com</span> / <span className="font-mono text-xs bg-zinc-100 px-2 py-1 rounded">admin123</span>
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
