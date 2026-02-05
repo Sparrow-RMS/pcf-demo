@@ -39,6 +39,9 @@ const BOMs = () => {
   const [newLineItemId, setNewLineItemId] = useState('');
   const [newLineQty, setNewLineQty] = useState('');
   const [newLineRecovery, setNewLineRecovery] = useState('0');
+  const [viewOpen, setViewOpen] = useState(false);
+  const [selectedBOM, setSelectedBOM] = useState(null);
+
 
   useEffect(() => {
     fetchData();
@@ -116,6 +119,16 @@ const BOMs = () => {
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to activate');
+    }
+  };
+
+  const handleView = async (bom) => {
+    try {
+      const res = await axios.get(`${API_URL}/boms/${bom.id}`, getAuthHeaders());
+      setSelectedBOM(res.data);
+      setViewOpen(true);
+    } catch {
+      toast.error("Failed to fetch BOM details");
     }
   };
 
@@ -280,7 +293,7 @@ const BOMs = () => {
             </DialogContent>
           </Dialog>
         )}
-      </div>
+      </div>      
 
       <div className="grid-card overflow-hidden">
         {loading ? (
@@ -314,8 +327,17 @@ const BOMs = () => {
                     <td>v{bom.version}</td>
                     <td>{getStatusBadge(bom.status)}</td>
                     {hasRole(['master_approver']) && (
-                      <td>
-                        {bom.status === 'draft' && (
+                      <td className="flex gap-2">
+                          {/* VIEW BUTTON */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8"
+                            onClick={() => handleView(bom)}
+                          >
+                            View
+                          </Button>
+                        {bom.status === 'draft' && ( 
                           <Button 
                             size="sm" 
                             variant="outline" 
@@ -336,6 +358,61 @@ const BOMs = () => {
           </div>
         )}
       </div>
+      {/* SIMPLE VIEW POPUP */}
+      {viewOpen && selectedBOM && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+          <div className="bg-white rounded-lg p-6 w-[500px] shadow-xl">
+
+            <h2 className="text-xl font-bold mb-4">BOM Details</h2>
+
+            <p><b>Code:</b> {selectedBOM.code}</p>
+            <p><b>Name:</b> {selectedBOM.name}</p>
+            <p><b>Output SKU:</b> {getSKUName(selectedBOM.output_sku_id)}</p>
+            <p><b>Version:</b> v{selectedBOM.version}</p>
+            <p><b>Status:</b> {selectedBOM.status}</p>
+
+            <div className="mt-4">
+              <b>Items:</b>
+
+              {selectedBOM.lines?.map((line, i) => (
+                <div key={i} className="border p-3 mt-2 rounded">
+
+                  {/* ITEM NAME */}
+                  <div className="font-medium">
+                    {line.item_type === 'raw_material'
+                      ? getRMName(line.item_id)
+                      : getSKUName(line.item_id)}
+                  </div>
+
+                  {/* TYPE */}
+                  <div className="text-sm text-gray-600">
+                    Type: {line.item_type === 'raw_material' ? 'Raw Material' : 'Intermediate SKU'}
+                  </div>
+
+                  {/* QTY */}
+                  <div className="text-sm text-gray-600">
+                    Qty: {line.quantity} {line.unit}
+                  </div>
+
+                  {/* RECOVERY */}
+                  <div className="text-sm text-green-600">
+                    Recovery: {line.recovery_rate || 0}%
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button onClick={() => setViewOpen(false)}>Close</Button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
